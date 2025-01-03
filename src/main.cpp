@@ -6,7 +6,8 @@
 #include <Arduino.h>
 
 // Variables
-FloppyOS *FloppyOS = nullptr;
+FloppyOS *floppyOSInstance = nullptr;
+uint8_t setupSuccess = 0;
 
 // Setup function
 void setup(void)
@@ -22,15 +23,19 @@ void setup(void)
   }
 
   // Create the application
-  FloppyOS = FloppyOS::getInstance();
+  floppyOSInstance = FloppyOS::getInstance();
 
   // Setup the application
-  FloppyOS->setup();
+  setupSuccess = floppyOSInstance->setup();
 }
 
 // Main loop
 void loop()
 {
   // Update the application
-  FloppyOS->update();
+  
+  if (setupSuccess)
+  {
+    floppyOSInstance->update();
+  }
 }

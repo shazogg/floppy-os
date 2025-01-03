@@ -10,30 +10,7 @@
 class FloppyHardware
 {
 public:
-  // Constructor
-  FloppyHardware(void);
-
   // Functions
-
-  /**
-   * @brief Avoid the copy of the class
-   *
-   * @param other The other instance
-   */
-  // FloppyHardware(FloppyHardware &other) = delete;
-
-  /**
-   * @brief Avoir creation of the class
-   *
-   */
-  // void operator=(const FloppyHardware &) = delete;
-
-  /**
-   * @brief Get the Instance object
-   *
-   * @return The instance of the class
-   */
-  static FloppyHardware *getInstance();
 
   /**
    * @brief Check if the PSRAM is available
@@ -96,7 +73,4 @@ public:
    * @return The line read
    */
   static char *readLine(void);
-
-private:
-  static FloppyHardware *singleton; // The instance of the class
 };

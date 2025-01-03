@@ -27,6 +27,7 @@ FloppyOS *FloppyOS::singleton = nullptr; // Initialize the instance
 FloppyOS::FloppyOS(void)
 {
   this->display = new FloppyDisplay(FloppyDisplay::DisplayDriverType::ST7789_V2, DISPLAY_BL, DISPLAY_MOSI, DISPLAY_CLK, DISPLAY_DC, DISPLAY_RST, DISPLAY_CS);
+  this->files = new FloppyFiles();
 }
 
 // Functions
@@ -69,19 +70,34 @@ uint8_t FloppyOS::setup(void)
     (*this->display).drawCanvas();
   }
 
-  // Initialize SPIFFS
-  if (!SPIFFS.begin(true))
+  // Initialize file system
+  if (!FloppyFiles::initFS())
   {
-    Serial.println("SPIFFS Mount Failed");
+    FloppyHardware::print("file_system_mount_failed\n");
+
+    // Show error on screen
+    (this->display)->clearCanvas();
+    (this->display)->drawStringCanvas(127, 8, "error: File system mount failed", 255, 0, 0, 8, 90);
+    (this->display)->drawCanvas();
+
+    return 0;
   }
 
-  Serial.println("SPIFFS mounted successfully");
+  // Initialize settings
+  if (!this->files->initSettings())
+  {
+    FloppyHardware::print("settings_init_failed\n");
 
-  // Initialize the buttons
-  FloppyGPIO::setPinMode(BUTTON_A, INPUT_PULLUP);
+    // Show error on screen
+    (this->display)->clearCanvas();
+    (this->display)->drawStringCanvas(127, 8, "error: Settings init failed", 255, 0, 0, 8, 90);
+    (this->display)->drawCanvas();
+
+    return 0;
+  }
 
   // Return
-  return 0;
+  return 1;
 }
 uint8_t FloppyOS::update(void)
 {

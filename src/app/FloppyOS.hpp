@@ -13,7 +13,8 @@
 #include "assets/icon.hpp"
 
 // Defines
-#define FLOPPY_OS_VERSION "Proto V2.0.0"
+#define FLOPPY_OS_VERSION "Proto V2.0.1"
+#define FLOPPY_OS_ENCRYPTION_KEY "FLOPPYOS" // Change this to your own key
 
 // Main class
 class FloppyOS
@@ -62,6 +63,9 @@ private:
 
   // Display
   FloppyDisplay *display = nullptr;
+
+  // Files
+  FloppyFiles *files = nullptr;
 
   // Functions
 

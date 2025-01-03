@@ -4,23 +4,7 @@
 // Constants
 #define SERIAL_BUFFER_SIZE 256
 
-// Variables
-FloppyHardware *FloppyHardware::singleton = nullptr; // Initialize the instance
-
 // Functions
-FloppyHardware::FloppyHardware(void)
-{
-}
-
-FloppyHardware *FloppyHardware::getInstance()
-{
-  if (singleton == nullptr)
-  {
-    singleton = new FloppyHardware();
-  }
-  return singleton;
-}
-
 bool FloppyHardware::checkPSRAM(void)
 {
   return psramInit();
