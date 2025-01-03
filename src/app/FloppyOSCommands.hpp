@@ -8,10 +8,13 @@
 class FloppyOSCommands
 {
 public:
+  // Constructor
+  FloppyOSCommands();
+
   /**
    * @brief Read a command on serial
    * 
    * @param command The command to execute
    */
-  static void readCommand(FloppyDisplay *display);
+  void readCommand(FloppyDisplay *display);
 };

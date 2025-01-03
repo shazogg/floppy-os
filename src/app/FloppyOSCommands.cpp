@@ -3,6 +3,12 @@
 #include "FloppyHardware.hpp"
 #include <cstring>
 #include "FloppyFiles.hpp"
+#include "FloppyOS.hpp"
+
+// Constructor
+FloppyOSCommands::FloppyOSCommands()
+{
+}
 
 // Functions
 void FloppyOSCommands::readCommand(FloppyDisplay *display)
@@ -26,7 +32,7 @@ void FloppyOSCommands::readCommand(FloppyDisplay *display)
       FloppyHardware::print("read_file_authorized\n");
 
       // Read the file
-      FloppyFiles::readFileToSerial(filename);
+      FloppyOS::getInstance()->getFiles()->readFileToSerial(filename);
     }
     else if (strcmp(line, "write_file") == 0)
     {
@@ -52,7 +58,7 @@ void FloppyOSCommands::readCommand(FloppyDisplay *display)
       FloppyHardware::print("write_file_authorized\n");
 
       // Write the file
-      uint8_t writeResult = FloppyFiles::writeFileFromSerial(filename);
+      uint8_t writeResult = FloppyOS::getInstance()->getFiles()->writeFileFromSerial(filename);
 
       // Print the result
       if (writeResult == 0)

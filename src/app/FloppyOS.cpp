@@ -28,6 +28,7 @@ FloppyOS::FloppyOS(void)
 {
   this->display = new FloppyDisplay(FloppyDisplay::DisplayDriverType::ST7789_V2, DISPLAY_BL, DISPLAY_MOSI, DISPLAY_CLK, DISPLAY_DC, DISPLAY_RST, DISPLAY_CS);
   this->files = new FloppyFiles();
+  this->commands = new FloppyOSCommands();
 }
 
 // Functions
@@ -38,6 +39,16 @@ FloppyOS *FloppyOS::getInstance()
     singleton = new FloppyOS();
   }
   return singleton;
+}
+
+FloppyDisplay *FloppyOS::getDisplay(void)
+{
+  return this->display;
+}
+
+FloppyFiles *FloppyOS::getFiles(void)
+{
+  return this->files;
 }
 
 uint8_t FloppyOS::setup(void)
@@ -102,7 +113,7 @@ uint8_t FloppyOS::setup(void)
 uint8_t FloppyOS::update(void)
 {
   // Read the command
-  FloppyOSCommands::readCommand(this->display);
+  this->commands->readCommand(this->display);
 
   // Return
   return 0;

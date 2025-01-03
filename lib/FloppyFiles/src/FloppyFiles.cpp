@@ -6,6 +6,7 @@
 
 // Constants
 #define FORMAT_SPIFFS_IF_FAILED true
+#define AES_BITS 128
 
 // Constructor
 FloppyFiles::FloppyFiles()
@@ -28,7 +29,7 @@ uint32_t FloppyFiles::getFreeSpace(void)
   return SPIFFS.totalBytes() - SPIFFS.usedBytes();
 }
 
-uint8_t FloppyFiles::readFileToSerial(const char *filename)
+/*uint8_t FloppyFiles::readFileToSerial(const char *filename)
 {
   // Open the file
   File file = SPIFFS.open(filename, "r");
@@ -88,42 +89,133 @@ uint8_t FloppyFiles::readFileToSerial(const char *filename)
   FloppyHardware::print("\n");
 
   return 1;
-}
+}*/
 
-uint8_t FloppyFiles::writeFileFromSerial(const char *filename)
+uint8_t FloppyFiles::readFileToSerial(const char *filename)
 {
+  // Temp AES key and IV
+  byte aes_key[16] = {0};
+  byte aes_iv[16] = {0};
+
   // Open the file
-  File file = SPIFFS.open(filename, "w");
+  File file = SPIFFS.open(filename, "r");
   if (!file)
   {
     FloppyHardware::print("Error: File not found\n");
     return 0;
   }
 
+  // Metadata
+  FloppyHardware::print(filename);
+  FloppyHardware::print("\n");
+
+  // File size
+  char size[10];
+  itoa(file.size(), size, 10);
+  FloppyHardware::print(size);
+  FloppyHardware::print("\n");
+
+  // Read the IV from the file
+  file.readBytes((char*)aes_iv, 16);
+
+  // Read encrypted data from the file into a buffer
+  char encryptedData[256] = {0};
+  size_t bytesRead = file.readBytes(encryptedData, sizeof(encryptedData) - 1);
+  file.close();
+  
+  if (bytesRead == 0)
+  {
+    FloppyHardware::print("Error: File is empty or could not be read\n");
+    return 0;
+  }
+
+  // Decrypt the data
+  byte decrypted[256] = {0};
+  aesLib.decrypt64(encryptedData, bytesRead, decrypted, aes_key, AES_BITS, aes_iv);
+
   // Initialize CRC32
   unsigned long crc = 0xFFFFFFFF;
 
-  // Read the file, send to serial, and compute CRC32 simultaneously
+  // Send decrypted data to the serial port and calculate CRC32
+  for (size_t i = 0; i < strlen((char*)decrypted); i++)
+  {
+    byte data = decrypted[i];
+    Serial.write(data);
+    crc ^= data;
+
+    // Compute CRC32
+    for (int j = 0; j < 8; j++)
+    {
+      if (crc & 1)
+      {
+        crc = (crc >> 1) ^ 0xEDB88320; // Standard CRC32 polynomial
+      }
+      else
+      {
+        crc >>= 1;
+      }
+    }
+  }
+
+  // Send end-of-file marker
+  FloppyHardware::print("\x04"); // End of transmission
+  FloppyHardware::print("\n");
+
+  // Finalize CRC32
+  crc = ~crc;
+
+  // Print computed CRC32
+  char crcStr[10];
+  sprintf(crcStr, "%08X", crc); // Convert to hexadecimal string (8 digits)
+  FloppyHardware::print(crcStr);
+  FloppyHardware::print("\n");
+
+  return 1;
+}
+
+uint8_t FloppyFiles::writeFileFromSerial(const char *filename)
+{
+  // Temp AES key and IV
+  byte aes_key[16] = {0};
+  byte aes_iv[16] = {0};
+
+  // Open the file
+  File file = SPIFFS.open(filename, "w");
+  if (!file)
+  {
+    FloppyHardware::print("Error: File could not be created\n");
+    return 0;
+  }
+
+  // Write iv to the file
+  file.write(aes_iv, 16);
+
+  // Initialize CRC32
+  unsigned long crc = 0xFFFFFFFF;
+
+  // Read data from the serial port into a plain text buffer
+  char plainData[256] = {0};
+  size_t index = 0;
+
   while (true)
   {
-    // Read one byte from the serial port
     while (!FloppyHardware::available())
     {
       delay(1);
     }
+
     char data = FloppyHardware::read();
 
-    // Check for the end of file marker
-    if (data == 0x04)
+    // Check for end-of-file marker
+    if (data == 0x04 || index >= sizeof(plainData) - 1)
     {
       break;
     }
 
-    // Write the byte to the file
-    file.write(data);
-    crc ^= data; // Update the CRC32 calculation
+    plainData[index++] = data;
+    crc ^= data;
 
-    // Perform the CRC32 computation
+    // Compute CRC32
     for (int i = 0; i < 8; i++)
     {
       if (crc & 1)
@@ -137,19 +229,29 @@ uint8_t FloppyFiles::writeFileFromSerial(const char *filename)
     }
   }
 
-  file.close();
+  // Null-terminate the plain data buffer
+  plainData[index] = '\0';
 
   // Finalize CRC32
   crc = ~crc;
 
-  // Print the computed CRC32
+  // Print computed CRC32
   char crcStr[10];
   sprintf(crcStr, "%08X", crc); // Convert to hexadecimal string (8 digits)
   FloppyHardware::print(crcStr);
   FloppyHardware::print("\n");
 
+  // Encrypt the data
+  char encrypted[256] = {0};
+  aesLib.encrypt64((const byte*)plainData, strlen(plainData), encrypted, aes_key, AES_BITS, aes_iv);
+
+  // Write encrypted data to the file
+  file.write((uint8_t *)encrypted, strlen(encrypted));
+  file.close();
+
   return 1;
 }
+
 
 void FloppyFiles::setString(const char *key, const char *value)
 {

@@ -8,12 +8,13 @@
 #include <FloppyDisplay.hpp>
 #include <FloppyHardware.hpp>
 #include <FloppyFiles.hpp>
+#include "FloppyOSCommands.hpp" // Ensure this file exists and is correctly included
 
 // Include assets
 #include "assets/icon.hpp"
 
 // Defines
-#define FLOPPY_OS_VERSION "Proto V2.0.1"
+#define FLOPPY_OS_VERSION "Proto V2.0.2"
 #define FLOPPY_OS_ENCRYPTION_KEY "FLOPPYOS" // Change this to your own key
 
 // Main class
@@ -41,6 +42,27 @@ public:
   static FloppyOS *getInstance();
 
   /**
+   * @brief Get the Display object
+   *
+   * @return The display
+   */
+  FloppyDisplay *getDisplay(void);
+
+  /**
+   * @brief Get the Files object
+   *
+   * @return The files
+   */
+  FloppyFiles *getFiles(void);
+
+  /**
+   * @brief Get the Commands object
+   *
+   * @return The commands
+   */
+  FloppyOSCommands *getCommands(void);
+
+  /**
    * @brief Setup the application
    *
    * @return The status of the setup
@@ -66,6 +88,9 @@ private:
 
   // Files
   FloppyFiles *files = nullptr;
+
+  // Commands
+  FloppyOSCommands *commands = nullptr;
 
   // Functions
 
