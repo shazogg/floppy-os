@@ -3,7 +3,7 @@
 
 ## Overview
 
-Floppy OS is a lightweight, modular operating system designed for embedded devices, specifically targeting the M5Stick-C platform (ESP32-based). It features a custom display driver, file management, GPIO control, and hardware abstraction, all written in modern C++ and organized for extensibility. This project is ideal for portfolios, demonstrating advanced embedded programming, modular architecture, and hardware interfacing.
+Floppy OS is a lightweight, modular operating system designed for embedded devices, specifically targeting the M5Stick-C platform (ESP32-based). It features a custom display driver, file management, GPIO control, and hardware abstraction, all written in modern C++ and organized for extensibility.
 
 ## Features
 
