@@ -75,13 +75,6 @@ floppy-os-main/
 - File operations are encrypted and managed via SPIFFS.
 - Display driver supports custom fonts and images (see Python tools for conversion).
 
-## Portfolio Highlights
-
-- **Modular C++ Design:** Each hardware feature is encapsulated for clarity and maintainability.
-- **Advanced Embedded Techniques:** PSRAM, SPI, FreeRTOS, and custom drivers.
-- **Python Integration:** Font/image conversion tools for UI customization.
-- **Documentation & Readability:** Clean code, comments, and structured project layout.
-
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
